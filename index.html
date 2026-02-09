@@ -31,6 +31,7 @@
 <section class="max-w-7xl mx-auto mt-8 px-4">
   <h2 class="text-4xl font-bold mb-6">Upcoming Events</h2>
   <div id="events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+
 </section>
 
 <footer class="bg-gray-900 mt-12 py-6 text-center text-gray-500 text-sm">
@@ -40,15 +41,16 @@
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
+// Supabase keys
 const supabaseUrl = "https://nyyfjbsylrmgwznyjfsj.supabase.co"
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55eWZqYnN5bHJtZ3d6bnNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1OTE5MzksImV4cCI6MjA4NjE2NzkzOX0.tPTTRI-bp2tol3w1ewLgz5FLTz-ZxzM4vHR7bVj6PTQ"
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function loadEvents() {
   const { data, error } = await supabase.from('events').select('*').order('datetime', { ascending: true })
-  console.log("Supabase rows:", data, error)
+  console.log("Supabase rows on index:", data, error)
 
-  const container = document.getElementById('events')
+  const container = document.getElementById('events') // <-- make sure your div has id="events"
   container.innerHTML = ''
 
   if (error) {
@@ -81,6 +83,3 @@ async function loadEvents() {
 
 loadEvents()
 </script>
-
-</body>
-</html>
