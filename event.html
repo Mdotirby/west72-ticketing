@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get Tickets - West72</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Poppins', sans-serif; background-color: #0f0f0f; color: #f0f0f0; }
+  .cta-btn { background-color: #ff3e00; transition: 0.3s; }
+  .cta-btn:hover { background-color: #ff5c2e; transform: scale(1.05); }
+</style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+<header class="flex justify-between items-center py-6 px-8 bg-gray-900 shadow-lg">
+  <h1 class="text-3xl font-bold text-white">West72 Events</h1>
+  <nav>
+    <a href="../index.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Home</a>
+  </nav>
+</header>
+
+<main class="max-w-2xl mx-auto mt-8 px-4 flex-1">
+  <h2 id="event-title" class="text-4xl font-bold mb-4">Loading Event...</h2>
+  <p id="event-description" class="text-gray-300 mb-6"></p>
+
+  <form id="ticket-form" class="space-y-4 bg-gray-800 p-6 rounded-lg">
+    <input type="text" id="full_name" placeholder="Full Name" class="w-full p-2 rounded text-black" required>
+    <input type="email" id="email" placeholder="Email" class="w-full p-2 rounded text-black" required>
+    <input type="tel" id="phone" placeholder="Phone" class="w-full p-2 rounded text-black">
+    
+    <label class="inline-flex items-center">
+      <input type="checkbox" id="physical-ticket" class="mr-2"> I want a physical ticket
+    </label>
+
+    <div id="address-fields" class="hidden space-y-2">
+      <input type="text" id="address" placeholder="Address" class="w-full p-2 rounded text-black">
+      <input type="text" id="city" placeholder="City" class="w-full p-2 rounded text-black">
+      <input type="text" id="state" placeholder="State" class="w-full p-2 rounded text-black">
+      <input type="text" id="zip_code" placeholder="Zip Code" class="w-full p-2 rounded text-black">
+    </div>
+
+    <label class="inline-flex items-center">
+      <input type="checkbox" id="marketing_opt_in" class="mr-2"> I agree to receive marketing emails/SMS
+    </label>
+
+    <input type="number" id="quantity" value="1" min="1" class="w-full p-2 rounded text-black">
+    <button type="submit" class="cta-btn px-6 py-3 rounded font-semibold text-white">Buy Tickets</button>
+  </form>
+</main>
+
+<footer class="bg-gray-900 mt-12 py-6 text-center text-gray-500 text-sm">
+  &copy; 2026 West72 Entertainment
+</footer>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabaseUrl = "https://nyyfjbsylrmgwznyjfsj.supabase.co"
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55eWZqYnN5bHJtZ3d6bnNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1OTE5MzksImV4cCI6MjA4NjE2NzkzOX0.tPTTRI-bp2tol3w1ewLgz5FLTz-ZxzM4vHR7bVj6PTQ"
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+// Show/hide address fields
+document.getElementById('physical-ticket').addEventListener('change', e => {
+  document.getElementById('address-fields').classList.toggle('hidden', !e.target.checked)
+})
+
+// Get event ID from URL ?id=123
+const eventId = new URLSearchParams(window.location.search).get('id')
+
+// Load event details
+async function loadEvent() {
+  const { data, error } = await supabase.from('events').select('*').eq('id', eventId).single()
+  if(error || !data){
+    document.getElementById('event-title').textContent = "Event not found"
+    return
+  }
+  document.getElementById('event-title').textContent = data.title
+  document.getElementById('event-description').textContent = data.description
+}
+loadEvent()
+
+// Handle ticket form
+document.getElementById('ticket-form').addEventListener('submit', async e => {
+  e.preventDefault()
+  const full_name = document.getElementById('full_name').value
+  const email = document.getElementById('email').value
+  const phone = document.getElementById('phone').value
+  const physical = document.getElementById('physical-ticket').checked
+  const address = physical ? document.getElementById('address').value : null
+  const city = physical ? document.getElementById('city').value : null
+  const state = physical ? document.getElementById('state').value : null
+  const zip_code = physical ? document.getElementById('zip_code').value : null
+  const marketing_opt_in = document.getElementById('marketing_opt_in').checked
+  const quantity = parseInt(document.getElementById('quantity').value)
+
+  // Insert into Supabase customers
+  const { data, error } = await supabase.from('customers').insert([{
+    full_name, email, phone, address, city, state, zip_code, event_id: eventId, marketing_opt_in
+  }])
+  if(error){
+    alert("Error saving customer info: " + error.message)
+    return
+  }
+
+  // Stripe checkout
+  const stripe = Stripe("YOUR_STRIPE_PUBLISHABLE_KEY")
+  const { sessionId } = await fetch("/create-checkout-session", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ quantity, eventId })
+  }).then(r => r.json())
+
+  stripe.redirectToCheckout({ sessionId })
+})
+</script>
+</body>
+</html>
