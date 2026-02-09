@@ -5,113 +5,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>West72 Events</title>
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #0f0f0f;
-      color: #f0f0f0;
-    }
-
-    /* Card overlay gradient */
-    .event-card img {
-      transition: transform 0.3s ease;
-    }
-    .event-card:hover img {
-      transform: scale(1.05);
-    }
-    .event-overlay {
-      background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.3));
-    }
-
-    /* CTA button glow */
-    .cta-btn {
-      background-color: #ff3e00;
-      transition: background-color 0.3s, transform 0.3s;
-    }
-    .cta-btn:hover {
-      background-color: #ff5c2e;
-      transform: scale(1.05);
-    }
+    body { font-family: 'Poppins', sans-serif; background-color: #0f0f0f; color: #f0f0f0; }
+    .event-card img { transition: transform 0.3s ease; }
+    .event-card:hover img { transform: scale(1.05); }
+    .event-overlay { background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.3)); }
+    .cta-btn { background-color: #ff3e00; transition: background-color 0.3s, transform 0.3s; }
+    .cta-btn:hover { background-color: #ff5c2e; transform: scale(1.05); }
   </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
-  <!-- Header -->
-  <header class="flex justify-between items-center py-6 px-8 bg-gray-900 shadow-lg">
-    <h1 class="text-3xl font-bold text-white">West72 Events</h1>
-    <nav>
-      <a href="index.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Home</a>
-      <a href="events.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Events</a>
-      <a href="admin.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Admin</a>
-    </nav>
-  </header>
+<header class="flex justify-between items-center py-6 px-8 bg-gray-900 shadow-lg">
+  <h1 class="text-3xl font-bold text-white">West72 Events</h1>
+  <nav>
+    <a href="index.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Home</a>
+    <a href="events.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Events</a>
+    <a href="admin.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Admin</a>
+  </nav>
+</header>
 
-  <!-- Hero Section / Featured Events -->
-  <section class="max-w-7xl mx-auto mt-8 px-4">
-    <h2 class="text-4xl font-bold mb-6">Upcoming Events</h2>
-    <div id="events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-  </section>
+<section class="max-w-7xl mx-auto mt-8 px-4">
+  <h2 class="text-4xl font-bold mb-6">Upcoming Events</h2>
+  <div id="events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+</section>
 
-  <!-- Footer -->
-  <footer class="bg-gray-900 mt-12 py-6 text-center text-gray-500 text-sm">
-    &copy; 2026 West72 Entertainment
-  </footer>
+<footer class="bg-gray-900 mt-12 py-6 text-center text-gray-500 text-sm">
+  &copy; 2026 West72 Entertainment
+</footer>
 
-  <!-- Supabase JS -->
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-    const supabase = createClient(supabaseUrl, supabaseKey)
+const supabaseUrl = "https://nyyfjbsylrmgwznyjfsj.supabase.co"
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55eWZqYnN5bHJtZ3d6bnNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1OTE5MzksImV4cCI6MjA4NjE2NzkzOX0.tPTTRI-bp2tol3w1ewLgz5FLTz-ZxzM4vHR7bVj6PTQ"
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-    async function loadEvents() {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('datetime', { ascending: true })
+async function loadEvents() {
+  const { data, error } = await supabase.from('events').select('*').order('datetime', { ascending: true })
+  console.log("Supabase rows:", data, error)
 
-      if (error) {
-        document.getElementById('events').innerHTML = '<p class="text-red-500">Failed to load events.</p>'
-        console.error(error)
-        return
-      }
+  const container = document.getElementById('events')
+  container.innerHTML = ''
 
-      const container = document.getElementById('events')
-      container.innerHTML = ''
+  if (error) {
+    container.innerHTML = '<p class="text-red-500">Failed to load events.</p>'
+    return
+  }
 
-     data.forEach(event => {
-  // Fallbacks if data is missing
-  const title = event.title || "Untitled Event"
-  const location = event.location || "Location TBA"
-  const datetime = event.datetime ? new Date(event.datetime).toLocaleString() : "Date TBA"
-  const price = event.price != null ? `$${event.price}` : "Price TBA"
-  const imageUrl = event.image_url || "Primary.png"  // <-- your placeholder
+  data.forEach(event => {
+    const title = event.title || "Untitled Event"
+    const location = event.location || "Location TBA"
+    const datetime = event.datetime ? new Date(event.datetime).toLocaleString() : "Date TBA"
+    const price = event.price != null ? `$${event.price}` : "Price TBA"
+    const imageUrl = event.image_url || "Primary.png"
 
-  const card = document.createElement('div')
-  card.className = "relative event-card rounded-xl overflow-hidden shadow-xl hover:shadow-2xl cursor-pointer"
+    const card = document.createElement('div')
+    card.className = "relative event-card rounded-xl overflow-hidden shadow-xl hover:shadow-2xl cursor-pointer"
+    card.innerHTML = `
+      <img src="${imageUrl}" class="w-full h-64 object-cover rounded-xl">
+      <div class="event-overlay absolute bottom-0 left-0 right-0 p-4 text-white">
+        <h3 class="text-xl font-bold mb-1">${title}</h3>
+        <p class="text-gray-200 text-sm mb-1">${location}</p>
+        <p class="text-gray-300 text-sm mb-2">${datetime}</p>
+        <p class="text-orange-400 font-semibold mb-2">${price}</p>
+        <a href="event/${event.id}.html" class="cta-btn inline-block px-5 py-2 rounded font-semibold text-white">Get Tickets</a>
+      </div>
+    `
+    container.appendChild(card)
+  })
+}
 
-  card.innerHTML = `
-    <img src="${imageUrl}" class="w-full h-64 object-cover rounded-xl">
-    <div class="event-overlay absolute bottom-0 left-0 right-0 p-4 text-white">
-      <h3 class="text-xl font-bold mb-1">${title}</h3>
-      <p class="text-gray-200 text-sm mb-1">${location}</p>
-      <p class="text-gray-300 text-sm mb-2">${datetime}</p>
-      <p class="text-orange-400 font-semibold mb-2">${price}</p>
-      <a href="event/${event.id}.html" class="cta-btn inline-block px-5 py-2 rounded font-semibold text-white">Get Tickets</a>
-    </div>
-  `
-  container.appendChild(card)
-})
-
-    loadEvents()
-  </script>
+loadEvents()
+</script>
 
 </body>
 </html>
