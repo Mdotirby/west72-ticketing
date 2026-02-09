@@ -86,23 +86,29 @@
       const container = document.getElementById('events')
       container.innerHTML = ''
 
-      data.forEach(event => {
-        const card = document.createElement('div')
-        card.className = "relative event-card rounded-xl overflow-hidden shadow-xl hover:shadow-2xl cursor-pointer"
+     data.forEach(event => {
+  // Fallbacks if data is missing
+  const title = event.title || "Untitled Event"
+  const location = event.location || "Location TBA"
+  const datetime = event.datetime ? new Date(event.datetime).toLocaleString() : "Date TBA"
+  const price = event.price != null ? `$${event.price}` : "Price TBA"
+  const imageUrl = event.image_url || "Primary.png"  // <-- your placeholder
 
-        card.innerHTML = `
-          <img src="${event.image_url}" class="w-full h-64 object-cover rounded-xl">
-          <div class="event-overlay absolute bottom-0 left-0 right-0 p-4 text-white">
-            <h3 class="text-xl font-bold mb-1">${event.title}</h3>
-            <p class="text-gray-200 text-sm mb-1">${event.location}</p>
-            <p class="text-gray-300 text-sm mb-2">${new Date(event.datetime).toLocaleString()}</p>
-            <p class="text-orange-400 font-semibold mb-2">$${event.price}</p>
-            <a href="event/${event.id}.html" class="cta-btn inline-block px-5 py-2 rounded font-semibold text-white">Get Tickets</a>
-          </div>
-        `
-        container.appendChild(card)
-      })
-    }
+  const card = document.createElement('div')
+  card.className = "relative event-card rounded-xl overflow-hidden shadow-xl hover:shadow-2xl cursor-pointer"
+
+  card.innerHTML = `
+    <img src="${imageUrl}" class="w-full h-64 object-cover rounded-xl">
+    <div class="event-overlay absolute bottom-0 left-0 right-0 p-4 text-white">
+      <h3 class="text-xl font-bold mb-1">${title}</h3>
+      <p class="text-gray-200 text-sm mb-1">${location}</p>
+      <p class="text-gray-300 text-sm mb-2">${datetime}</p>
+      <p class="text-orange-400 font-semibold mb-2">${price}</p>
+      <a href="event/${event.id}.html" class="cta-btn inline-block px-5 py-2 rounded font-semibold text-white">Get Tickets</a>
+    </div>
+  `
+  container.appendChild(card)
+})
 
     loadEvents()
   </script>
