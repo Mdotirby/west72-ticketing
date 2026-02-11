@@ -1,85 +1,210 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>All Events - West72</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <style>
-    body { font-family: 'Poppins', sans-serif; background-color: #0f0f0f; color: #f0f0f0; }
-    .event-card img { transition: transform 0.3s ease; }
-    .event-card:hover img { transform: scale(1.05); }
-    .event-overlay { background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.3)); }
-    .cta-btn { background-color: #ff3e00; transition: background-color 0.3s, transform 0.3s; }
-    .cta-btn:hover { background-color: #ff5c2e; transform: scale(1.05); }
-  </style>
-</head>
-<body class="flex flex-col min-h-screen">
-
-<header class="flex justify-between items-center py-6 px-8 bg-gray-900 shadow-lg">
-  <h1 class="text-3xl font-bold text-white">West72 Events</h1>
-  <nav>
-    <a href="index.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Home</a>
-    <a href="admin.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Admin</a>
-  </nav>
-</header>
-
-<main class="max-w-7xl mx-auto mt-8 px-4 flex-1">
-  <h2 class="text-4xl font-bold mb-6">All Events</h2>
-  <div id="events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-</main>
-
-<footer class="bg-gray-900 mt-12 py-6 text-center text-gray-500 text-sm">
-  &copy; 2026 West72 Entertainment
-</footer>
-
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-const supabaseUrl = "https://nyyfjbsylrmgwznyjfsj.supabase.co"
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55eWZqYnN5bHJtZ3d6bnlqZnNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1OTE5MzksImV4cCI6MjA4NjE2NzkzOX0.tPTTRI-bp2tol3w1ewLgz5FLTz-ZxzM4vHR7bVj6PTQ"
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-async function loadEvents() {
-  const { data, error } = await supabase.from('events').select('*').order('datetime', { ascending: true })
-  console.log("Supabase rows:", data, error)
-
-  const container = document.getElementById('events')
-  container.innerHTML = ''
-
-  if (error) {
-    container.innerHTML = '<p class="text-red-500">Failed to load events.</p>'
-    return
-  }
-
-  data.forEach(event => {
-    const title = event.title || "Untitled Event"
-    const location = event.location || "Location TBA"
-    const datetime = event.datetime ? new Date(event.datetime).toLocaleString() : "Date TBA"
-    const price = event.price != null ? `$${event.price}` : "Price TBA"
-    const imageUrl = event.image_url || "Primary.png"
-
-    const card = document.createElement('div')
-    card.className = "relative event-card rounded-xl overflow-hidden shadow-xl hover:shadow-2xl cursor-pointer"
-    card.innerHTML = `
-      <img src="${imageUrl}" class="w-full h-64 object-cover rounded-xl">
-      <div class="event-overlay absolute bottom-0 left-0 right-0 p-4 text-white">
-        <h3 class="text-xl font-bold mb-1">${title}</h3>
-        <p class="text-gray-200 text-sm mb-1">${location}</p>
-        <p class="text-gray-300 text-sm mb-2">${datetime}</p>
-        <p class="text-orange-400 font-semibold mb-2">${price}</p>
-        <a href="event/${event.id}.html" class="cta-btn inline-block px-5 py-2 rounded font-semibold text-white">Get Tickets</a>
-      </div>
-    `
-    container.appendChild(card)
-  })
-}
-
-loadEvents()
-</script>
-
-</body>
-</html>
+diff --git a/events.html b/events.html
+index b78f5a51c67bdcc956c61fab6443f6a6052d66bd..098bd916ebb9912956f7aee9eeca81519a57e17d 100644
+--- a/events.html
++++ b/events.html
+@@ -1,85 +1,145 @@
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+-  <title>All Events - West72</title>
+-
++  <title>Events Calendar | West72</title>
+   <script src="https://cdn.tailwindcss.com"></script>
+-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+-
++  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+   <style>
+-    body { font-family: 'Poppins', sans-serif; background-color: #0f0f0f; color: #f0f0f0; }
+-    .event-card img { transition: transform 0.3s ease; }
+-    .event-card:hover img { transform: scale(1.05); }
+-    .event-overlay { background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.3)); }
+-    .cta-btn { background-color: #ff3e00; transition: background-color 0.3s, transform 0.3s; }
+-    .cta-btn:hover { background-color: #ff5c2e; transform: scale(1.05); }
++    :root { --brand-primary: #ff5d1f; --brand-secondary: #ff874f; }
++    body { font-family: 'Inter', sans-serif; background: #07090d; color: #f5f7fb; }
++    .event-row { border: 1px solid rgba(255,255,255,0.14); background: linear-gradient(180deg, rgba(23,31,44,0.9), rgba(13,17,25,0.9)); transition: transform .25s ease, border-color .25s ease; }
++    .event-row:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--brand-primary) 80%, #fff 4%); }
++    .calendar-pill { border: 1px solid rgba(255,255,255,0.16); transition: .2s ease; }
++    .calendar-pill:hover, .calendar-pill.active { border-color: color-mix(in srgb, var(--brand-primary) 80%, #fff 6%); background: color-mix(in srgb, var(--brand-primary) 18%, transparent); }
++    .cta-btn { background: linear-gradient(120deg, var(--brand-primary), var(--brand-secondary)); transition: .2s ease; }
++    .cta-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 25px color-mix(in srgb, var(--brand-primary) 55%, transparent); }
+   </style>
+ </head>
+-<body class="flex flex-col min-h-screen">
+-
+-<header class="flex justify-between items-center py-6 px-8 bg-gray-900 shadow-lg">
+-  <h1 class="text-3xl font-bold text-white">West72 Events</h1>
+-  <nav>
+-    <a href="index.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Home</a>
+-    <a href="admin.html" class="text-gray-300 hover:text-white ml-6 font-semibold">Admin</a>
+-  </nav>
++<body class="min-h-screen">
++<header class="border-b border-white/10 bg-[#090d14]">
++  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
++    <div class="flex items-center gap-8">
++      <a href="index.html" class="flex items-center gap-3">
++        <img src="Primary.png" alt="West72 logo" class="h-10 w-10 rounded-md object-cover border border-white/20">
++        <span class="text-2xl font-extrabold">West72</span>
++      </a>
++      <nav class="hidden sm:flex items-center gap-6 text-sm text-white/75">
++        <a href="index.html" class="hover:text-white">Home</a>
++        <a href="events.html" class="text-white">Events</a>
++        <a href="admin.html" class="hover:text-white">Admin</a>
++      </nav>
++    </div>
++    <div class="flex items-center gap-3">
++      <a href="index.html" class="border border-white/30 rounded-lg px-4 py-2 text-sm font-semibold hover:bg-white/5">View Calendar</a>
++      <a href="admin.html" class="cta-btn rounded-lg px-4 py-2 text-sm font-semibold">Create Event</a>
++    </div>
++  </div>
+ </header>
+ 
+-<main class="max-w-7xl mx-auto mt-8 px-4 flex-1">
+-  <h2 class="text-4xl font-bold mb-6">All Events</h2>
+-  <div id="events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+-</main>
++<main class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
++  <div class="flex items-center justify-between mb-4">
++    <h1 class="text-3xl font-extrabold">All Events</h1>
++    <button id="clear-filter" class="text-sm text-orange-300 hover:text-orange-200">Reset Date Filter</button>
++  </div>
+ 
+-<footer class="bg-gray-900 mt-12 py-6 text-center text-gray-500 text-sm">
+-  &copy; 2026 West72 Entertainment
+-</footer>
++  <div id="calendar" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 mb-7"></div>
++  <div id="events" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
++</main>
+ 
+ <script type="module">
+-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
++  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
++
++  const supabase = createClient(
++    'https://nyyfjbsylrmgwznyjfsj.supabase.co',
++    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55eWZqYnN5bHJtZ3d6bnlqZnNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1OTE5MzksImV4cCI6MjA4NjE2NzkzOX0.tPTTRI-bp2tol3w1ewLgz5FLTz-ZxzM4vHR7bVj6PTQ'
++  )
++
++  const eventsContainer = document.getElementById('events')
++  const calendar = document.getElementById('calendar')
++  const clearFilterBtn = document.getElementById('clear-filter')
++
++  let selectedDate = null
++  let allEvents = []
++
++  const keyForDate = value => value ? new Date(value).toISOString().split('T')[0] : null
+ 
+-const supabaseUrl = "https://nyyfjbsylrmgwznyjfsj.supabase.co"
+-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55eWZqYnN5bHJtZ3d6bnlqZnNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA1OTE5MzksImV4cCI6MjA4NjE2NzkzOX0.tPTTRI-bp2tol3w1ewLgz5FLTz-ZxzM4vHR7bVj6PTQ"
+-const supabase = createClient(supabaseUrl, supabaseKey)
++  const formatDate = value => value
++    ? new Date(value).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
++    : 'Date TBA'
+ 
+-async function loadEvents() {
+-  const { data, error } = await supabase.from('events').select('*').order('datetime', { ascending: true })
+-  console.log("Supabase rows:", data, error)
++  function renderCalendar() {
++    calendar.innerHTML = ''
++    const dates = [...new Set(allEvents.map(event => keyForDate(event.datetime)).filter(Boolean))]
+ 
+-  const container = document.getElementById('events')
+-  container.innerHTML = ''
++    dates.forEach(key => {
++      const button = document.createElement('button')
++      button.className = `calendar-pill rounded-xl p-3 text-left ${selectedDate === key ? 'active' : ''}`
++      const d = new Date(`${key}T00:00:00`)
++      button.innerHTML = `
++        <p class="text-xs text-white/65">${d.toLocaleDateString(undefined, { weekday: 'short' })}</p>
++        <p class="font-semibold">${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
++      `
++      button.onclick = () => {
++        selectedDate = key
++        renderCalendar()
++        renderEvents()
++      }
++      calendar.appendChild(button)
++    })
++  }
++
++  function renderEvents() {
++    eventsContainer.innerHTML = ''
++    const list = selectedDate
++      ? allEvents.filter(event => keyForDate(event.datetime) === selectedDate)
++      : allEvents
+ 
+-  if (error) {
+-    container.innerHTML = '<p class="text-red-500">Failed to load events.</p>'
+-    return
++    if (!list.length) {
++      eventsContainer.innerHTML = '<p class="text-white/70">No events available for this date.</p>'
++      return
++    }
++
++    list.forEach(event => {
++      const article = document.createElement('article')
++      article.className = 'event-row rounded-2xl p-4 flex gap-4'
++      article.innerHTML = `
++        <img src="${event.image_url || 'Primary.png'}" alt="${event.title || 'Event'}" class="w-32 h-28 object-cover rounded-xl">
++        <div class="flex-1">
++          <p class="text-xs text-orange-300 mb-1">${formatDate(event.datetime)}</p>
++          <h2 class="text-xl font-bold">${event.title || 'Untitled Event'}</h2>
++          <p class="text-white/65 text-sm mt-1">${event.location || 'Location TBA'}</p>
++          <div class="mt-4 flex justify-between items-center">
++            <p class="text-lg font-semibold text-orange-300">${event.price != null ? `$${event.price}` : 'Price TBA'}</p>
++            <a href="event.html?id=${event.id}" class="cta-btn rounded-lg px-4 py-2 text-sm font-semibold">Get Tickets</a>
++          </div>
++        </div>
++      `
++      eventsContainer.appendChild(article)
++    })
+   }
+ 
+-  data.forEach(event => {
+-    const title = event.title || "Untitled Event"
+-    const location = event.location || "Location TBA"
+-    const datetime = event.datetime ? new Date(event.datetime).toLocaleString() : "Date TBA"
+-    const price = event.price != null ? `$${event.price}` : "Price TBA"
+-    const imageUrl = event.image_url || "Primary.png"
+-
+-    const card = document.createElement('div')
+-    card.className = "relative event-card rounded-xl overflow-hidden shadow-xl hover:shadow-2xl cursor-pointer"
+-    card.innerHTML = `
+-      <img src="${imageUrl}" class="w-full h-64 object-cover rounded-xl">
+-      <div class="event-overlay absolute bottom-0 left-0 right-0 p-4 text-white">
+-        <h3 class="text-xl font-bold mb-1">${title}</h3>
+-        <p class="text-gray-200 text-sm mb-1">${location}</p>
+-        <p class="text-gray-300 text-sm mb-2">${datetime}</p>
+-        <p class="text-orange-400 font-semibold mb-2">${price}</p>
+-        <a href="event/${event.id}.html" class="cta-btn inline-block px-5 py-2 rounded font-semibold text-white">Get Tickets</a>
+-      </div>
+-    `
+-    container.appendChild(card)
++  clearFilterBtn.addEventListener('click', () => {
++    selectedDate = null
++    renderCalendar()
++    renderEvents()
+   })
+-}
+ 
+-loadEvents()
+-</script>
++  async function loadEvents() {
++    const { data, error } = await supabase.from('events').select('*').order('datetime', { ascending: true })
+ 
++    if (error) {
++      eventsContainer.innerHTML = '<p class="text-red-400">Failed to load events.</p>'
++      return
++    }
++
++    allEvents = data || []
++    renderCalendar()
++    renderEvents()
++  }
++
++  loadEvents()
++</script>
+ </body>
+ </html>
